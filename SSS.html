@@ -1,0 +1,4324 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JODMANGKASAI - Smart Parking</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap"
+rel="stylesheet"
+>
+
+<style>
+
+:root{
+    --font-color:#0f172a;
+    --primary-color:#2563eb;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    font-size:16px;
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    font-family:"Kanit",sans-serif;
+    background:#f8fafc;
+    color:var(--font-color);
+}
+
+button,input,select{
+    font-family:inherit;
+}
+
+.page{
+    min-height:100vh;
+}
+
+.hidden-view{
+    display:none!important;
+}
+
+.slot{
+    transition:.2s ease;
+}
+
+.slot:hover{
+    transform:translateY(-2px);
+}
+
+.search-result{
+    transition:.2s ease;
+}
+
+.search-result:hover{
+    background:#f8fafc;
+}
+
+.modal-bg{
+    background:rgba(15,23,42,.45);
+    backdrop-filter:blur(3px);
+}
+
+.popup-enter{
+    animation:popupEnter .2s ease-out;
+}
+
+@keyframes popupEnter{
+    from{
+        opacity:0;
+        transform:translate(-50%,-15px);
+    }
+    to{
+        opacity:1;
+        transform:translate(-50%,0);
+    }
+}
+
+.confirm-enter{
+    animation:confirmEnter .2s ease-out;
+}
+
+@keyframes confirmEnter{
+    from{
+        opacity:0;
+        transform:scale(.96);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+.scrollbar::-webkit-scrollbar{
+    width:6px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:10px;
+}
+
+.camera-screen{
+    background:
+    linear-gradient(
+        135deg,
+        #0f172a,
+        #1e293b
+    );
+}
+
+.camera-grid{
+    background-image:
+    linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+    background-size:40px 40px;
+}
+
+.car-image{
+    object-fit:cover;
+}
+
+@media(max-width:640px){
+
+    .mobile-padding{
+        padding-left:16px;
+        padding-right:16px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- =========================================================
+WELCOME
+========================================================= -->
+
+<section
+id="welcomePage"
+class="page flex items-center justify-center bg-white px-5"
+>
+
+<div class="w-full max-w-md text-center">
+
+<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg">
+<i class="fa-solid fa-square-parking text-4xl"></i>
+</div>
+
+<h1 class="text-3xl font-semibold text-slate-900">
+JODMANGKASAI
+</h1>
+
+<p class="mt-2 text-slate-500">
+ระบบค้นหาและจัดการที่จอดรถ
+</p>
+
+<div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm">
+
+<div class="flex items-start gap-4">
+
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+<i class="fa-solid fa-location-dot"></i>
+</div>
+
+<div>
+
+<h2 class="font-medium text-slate-800">
+ค้นหาที่จอดรถได้ง่ายขึ้น
+</h2>
+
+<p class="mt-1 text-sm leading-6 text-slate-500">
+ตรวจสอบช่องว่าง ดูกล้อง เลือกตำแหน่ง และจองที่จอดรถจากหน้าเดียว
+</p>
+
+</div>
+
+</div>
+
+<button
+onclick="showLogin()"
+class="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700"
+>
+เริ่มใช้งาน
+<i class="fa-solid fa-arrow-right ml-2"></i>
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =========================================================
+AUTH
+========================================================= -->
+
+<section
+id="authPage"
+class="page hidden-view flex items-center justify-center bg-slate-50 px-5"
+>
+
+<div class="w-full max-w-md">
+
+<div class="mb-6 text-center">
+
+<div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 text-white">
+<i class="fa-solid fa-square-parking text-2xl"></i>
+</div>
+
+<h1 class="text-2xl font-semibold text-slate-900">
+JODMANGKASAI
+</h1>
+
+<p class="mt-1 text-sm text-slate-500">
+สร้างบัญชีเพื่อเริ่มใช้งาน
+</p>
+
+</div>
+
+
+<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+
+<!-- AUTH PROGRESS -->
+
+<div
+id="registerProgress"
+class="mb-5 hidden"
+>
+
+<div class="flex items-center gap-2">
+
+<div
+id="stepOneCircle"
+class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm text-white"
+>
+1
+</div>
+
+<div class="h-1 flex-1 rounded bg-slate-200">
+<div
+id="progressBar"
+class="h-1 w-1/2 rounded bg-blue-600"
+></div>
+</div>
+
+<div
+id="stepTwoCircle"
+class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-sm text-slate-500"
+>
+2
+</div>
+
+</div>
+
+<div class="mt-2 flex justify-between text-xs text-slate-400">
+<span>บัญชี</span>
+<span>ข้อมูลรถ</span>
+</div>
+
+</div>
+
+
+<!-- TABS -->
+
+<div
+id="authTabs"
+class="mb-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
+>
+
+<button
+id="loginTab"
+onclick="switchAuth('login')"
+class="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm"
+>
+เข้าสู่ระบบ
+</button>
+
+<button
+id="registerTab"
+onclick="switchAuth('register')"
+class="rounded-lg px-4 py-2 text-sm text-slate-500"
+>
+สมัครสมาชิก
+</button>
+
+</div>
+
+
+<!-- LOGIN -->
+
+<form
+id="loginForm"
+onsubmit="login(event)"
+>
+
+<label class="mb-2 block text-sm font-medium text-slate-700">
+อีเมล
+</label>
+
+<input
+id="loginEmail"
+type="email"
+required
+placeholder="example@email.com"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+<label class="mb-2 mt-4 block text-sm font-medium text-slate-700">
+รหัสผ่าน
+</label>
+
+<input
+id="loginPassword"
+type="password"
+required
+placeholder="รหัสผ่าน"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+<button
+type="submit"
+class="mt-6 w-full rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
+>
+เข้าสู่ระบบ
+</button>
+
+</form>
+
+
+<!-- REGISTER STEP 1 -->
+
+<form
+id="registerFormStep1"
+onsubmit="nextRegisterStep(event)"
+class="hidden"
+>
+
+<label class="mb-2 block text-sm font-medium text-slate-700">
+ชื่อ
+</label>
+
+<input
+id="registerName"
+type="text"
+required
+placeholder="ชื่อของคุณ"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+<label class="mb-2 mt-4 block text-sm font-medium text-slate-700">
+อีเมล
+</label>
+
+<input
+id="registerEmail"
+type="email"
+required
+placeholder="example@email.com"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+<label class="mb-2 mt-4 block text-sm font-medium text-slate-700">
+รหัสผ่าน
+</label>
+
+<input
+id="registerPassword"
+type="password"
+minlength="6"
+required
+placeholder="อย่างน้อย 6 ตัวอักษร"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+<button
+type="submit"
+class="mt-6 w-full rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
+>
+ถัดไป
+<i class="fa-solid fa-arrow-right ml-2"></i>
+</button>
+
+</form>
+
+
+<!-- REGISTER STEP 2 -->
+
+<form
+id="registerFormStep2"
+onsubmit="completeRegister(event)"
+class="hidden"
+>
+
+<div class="mb-5">
+
+<h2 class="font-semibold text-slate-900">
+ข้อมูลรถของคุณ
+</h2>
+
+<p class="mt-1 text-sm text-slate-400">
+ข้อมูลนี้จะใช้กับการจองที่จอดรถ
+</p>
+
+</div>
+
+
+<label class="mb-2 block text-sm font-medium text-slate-700">
+ทะเบียนรถ
+</label>
+
+<input
+id="registerPlate"
+type="text"
+required
+placeholder="เช่น 1กก 1234"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+
+<label class="mb-2 mt-4 block text-sm font-medium text-slate-700">
+รุ่นรถ
+</label>
+
+<input
+id="registerCarModel"
+type="text"
+required
+placeholder="เช่น Honda Click 160"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+
+<label class="mb-2 mt-4 block text-sm font-medium text-slate-700">
+สีรถ
+</label>
+
+<div class="relative">
+
+<input
+id="registerCarColor"
+type="text"
+required
+placeholder="เช่น ดำ"
+class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+>
+
+</div>
+
+
+<label class="mb-2 mt-4 block text-sm font-medium text-slate-700">
+รูปภาพรถ
+</label>
+
+<label
+class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 p-5 text-center hover:border-blue-400 hover:bg-blue-50/30"
+>
+
+<input
+id="registerCarImage"
+type="file"
+accept="image/*"
+class="hidden"
+onchange="previewCarImage(event)"
+>
+
+<div
+id="carImagePreview"
+class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-400"
+>
+
+<i class="fa-solid fa-camera text-2xl"></i>
+
+</div>
+
+<p class="mt-3 text-sm text-slate-500">
+กดเพื่อเลือกรูปรถ
+</p>
+
+<p class="text-xs text-slate-400">
+JPG / PNG
+</p>
+
+</label>
+
+
+<div class="mt-5 grid grid-cols-2 gap-3">
+
+<button
+type="button"
+onclick="previousRegisterStep()"
+class="rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
+>
+<i class="fa-solid fa-arrow-left mr-1"></i>
+ย้อนกลับ
+</button>
+
+<button
+type="submit"
+class="rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
+>
+สร้างบัญชี
+</button>
+
+</div>
+
+</form>
+
+
+<button
+id="backWelcomeButton"
+onclick="showWelcome()"
+class="mt-4 w-full text-sm text-slate-500 hover:text-blue-600"
+>
+<i class="fa-solid fa-arrow-left mr-1"></i>
+กลับหน้าแรก
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =========================================================
+APP
+========================================================= -->
+
+<section
+id="appPage"
+class="hidden-view min-h-screen bg-slate-50"
+>
+
+<header
+class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur"
+>
+
+<div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+
+<button
+onclick="showDashboard()"
+class="flex items-center gap-3"
+>
+
+<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
+<i class="fa-solid fa-square-parking"></i>
+</div>
+
+<div class="hidden text-left sm:block">
+
+<div class="font-semibold text-slate-900">
+JODMANGKASAI
+</div>
+
+<div class="text-xs text-slate-400">
+Smart Parking
+</div>
+
+</div>
+
+</button>
+
+
+<div class="flex items-center gap-2">
+
+<button
+onclick="openMyReservation()"
+class="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+title="การจองของฉัน"
+>
+<i class="fa-solid fa-bookmark"></i>
+</button>
+
+<button
+onclick="openSettings()"
+class="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+title="ตั้งค่า"
+>
+<i class="fa-solid fa-gear"></i>
+</button>
+
+<button
+onclick="logout()"
+class="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100"
+title="ออกจากระบบ"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboardView">
+
+<div class="mb-6">
+
+<p
+id="welcomeText"
+class="text-sm text-slate-500"
+>
+สวัสดี
+</p>
+
+<h1 class="mt-1 text-2xl font-semibold text-slate-900 sm:text-3xl">
+ค้นหาที่จอดรถ
+</h1>
+
+</div>
+
+
+<!-- CURRENT RESERVATION -->
+
+<div
+id="reservationCard"
+class="mb-6 hidden overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm"
+></div>
+
+
+<!-- SEARCH -->
+
+<div class="relative mb-6">
+
+<div class="flex overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+<div class="flex w-full items-center">
+
+<i class="fa-solid fa-magnifying-glass ml-4 text-slate-400"></i>
+
+<input
+id="searchInput"
+type="text"
+oninput="searchParking()"
+onfocus="searchParking(true)"
+placeholder="ค้นหาลานจอดรถ..."
+class="w-full bg-transparent px-4 py-4 outline-none"
+>
+
+</div>
+
+<button
+onclick="searchParking(true)"
+class="bg-blue-600 px-5 text-white hover:bg-blue-700"
+>
+ค้นหา
+</button>
+
+</div>
+
+<div
+id="searchResults"
+class="absolute left-0 right-0 top-full z-20 mt-2 hidden max-h-[420px] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl scrollbar"
+></div>
+
+</div>
+
+
+<!-- STATS -->
+
+<div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+<div class="rounded-2xl border border-slate-200 bg-white p-4">
+
+<div class="text-sm text-slate-500">
+ลานจอด
+</div>
+
+<div id="totalLots" class="mt-1 text-2xl font-semibold">
+7
+</div>
+
+</div>
+
+
+<div class="rounded-2xl border border-slate-200 bg-white p-4">
+
+<div class="text-sm text-slate-500">
+ที่ว่าง
+</div>
+
+<div id="totalAvailable" class="mt-1 text-2xl font-semibold text-emerald-600">
+0
+</div>
+
+</div>
+
+
+<div class="rounded-2xl border border-slate-200 bg-white p-4">
+
+<div class="text-sm text-slate-500">
+ไม่ว่าง
+</div>
+
+<div id="totalOccupied" class="mt-1 text-2xl font-semibold">
+0
+</div>
+
+</div>
+
+
+<div class="rounded-2xl border border-slate-200 bg-white p-4">
+
+<div class="text-sm text-slate-500">
+การจองของฉัน
+</div>
+
+<div id="myReservationStatus" class="mt-1 text-sm font-medium">
+ไม่มี
+</div>
+
+</div>
+
+</div>
+
+
+<div class="mb-3 flex items-center justify-between">
+
+<h2 class="text-lg font-semibold">
+ลานจอดรถ
+</h2>
+
+<button
+onclick="refreshData()"
+class="text-sm text-blue-600"
+>
+<i class="fa-solid fa-rotate-right mr-1"></i>
+รีเฟรช
+</button>
+
+</div>
+
+
+<div
+id="parkingList"
+class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+></div>
+
+</div>
+
+
+<!-- PARKING DETAIL -->
+
+<div
+id="parkingDetailView"
+class="hidden"
+>
+
+<button
+onclick="showDashboard()"
+class="mb-5 text-sm text-slate-500 hover:text-blue-600"
+>
+<i class="fa-solid fa-arrow-left mr-2"></i>
+กลับ
+</button>
+
+<div
+id="parkingDetail"
+class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+></div>
+
+</div>
+
+
+<!-- MY RESERVATION -->
+
+<div
+id="myReservationView"
+class="hidden"
+>
+
+<button
+onclick="showDashboard()"
+class="mb-5 text-sm text-slate-500 hover:text-blue-600"
+>
+<i class="fa-solid fa-arrow-left mr-2"></i>
+กลับหน้าหลัก
+</button>
+
+<div
+id="myReservationContent"
+></div>
+
+</div>
+
+</main>
+
+</section>
+
+
+
+<!-- =========================================================
+SLOT MODAL
+========================================================= -->
+
+<div
+id="slotModal"
+class="modal-bg fixed inset-0 z-50 hidden items-center justify-center p-4"
+>
+
+<div class="w-full max-w-sm rounded-2xl bg-white shadow-xl">
+
+<div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+<h2 class="font-semibold">
+รายละเอียดช่องจอด
+</h2>
+
+<button
+onclick="closeSlotModal()"
+class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+>
+<i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
+
+<div id="slotModalContent" class="p-5"></div>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================================================
+CAMERA MODAL
+========================================================= -->
+
+<div
+id="cameraModal"
+class="modal-bg fixed inset-0 z-[70] hidden items-center justify-center p-4"
+>
+
+<div class="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-xl">
+
+<div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+<div>
+
+<h2
+id="cameraTitle"
+class="font-semibold"
+>
+กล้องวงจรปิด
+</h2>
+
+<p
+id="cameraSubtitle"
+class="text-xs text-slate-400"
+>
+Parking Camera
+</p>
+
+</div>
+
+<button
+onclick="closeCamera()"
+class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+>
+<i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
+
+
+<div class="p-4">
+
+<div class="relative aspect-video overflow-hidden rounded-xl camera-screen">
+
+<video
+id="cameraVideo"
+autoplay
+playsinline
+muted
+class="hidden h-full w-full object-cover"
+></video>
+
+
+<div
+id="cameraDemo"
+class="camera-screen camera-grid flex h-full flex-col items-center justify-center text-white"
+>
+
+<div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+<i class="fa-solid fa-video text-2xl"></i>
+</div>
+
+<h3 class="mt-4 text-lg font-medium">
+กล้องตัวอย่าง
+</h3>
+
+<p class="mt-1 text-sm text-white/60">
+ภาพจำลองสำหรับระบบต้นแบบ
+</p>
+
+<div class="mt-5 rounded-lg bg-black/30 px-4 py-2 text-xs text-white/70">
+● LIVE DEMO
+</div>
+
+</div>
+
+
+<div class="absolute left-3 top-3 rounded-lg bg-red-600 px-3 py-1 text-xs text-white">
+● LIVE
+</div>
+
+<div
+id="cameraInfo"
+class="absolute bottom-3 left-3 rounded-lg bg-black/60 px-3 py-2 text-xs text-white"
+>
+Camera
+</div>
+
+</div>
+
+
+<div class="mt-4 grid grid-cols-3 gap-3">
+
+<div class="rounded-xl bg-slate-50 p-3 text-center">
+
+<div class="text-lg font-semibold text-emerald-600">
+LIVE
+</div>
+
+<div class="text-xs text-slate-400">
+สถานะ
+</div>
+
+</div>
+
+<div class="rounded-xl bg-slate-50 p-3 text-center">
+
+<div id="cameraAvailable" class="text-lg font-semibold">
+-
+</div>
+
+<div class="text-xs text-slate-400">
+ช่องว่าง
+</div>
+
+</div>
+
+<div class="rounded-xl bg-slate-50 p-3 text-center">
+
+<div id="cameraTotal" class="text-lg font-semibold">
+-
+</div>
+
+<div class="text-xs text-slate-400">
+ทั้งหมด
+</div>
+
+</div>
+
+</div>
+
+<p class="mt-4 text-center text-xs text-slate-400">
+ตัวอย่างระบบกล้อง — เมื่อนำไปใช้งานจริงสามารถเชื่อมต่อกล้อง IP / CCTV ของแต่ละจุดได้
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================================================
+MY RESERVATION QUICK MODAL
+========================================================= -->
+
+<div
+id="reservationModal"
+class="modal-bg fixed inset-0 z-50 hidden items-center justify-center p-4"
+>
+
+<div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+
+<div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+<h2 class="font-semibold">
+การจองของฉัน
+</h2>
+
+<button
+onclick="closeReservationModal()"
+class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+>
+<i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
+
+<div id="reservationModalContent" class="p-5"></div>
+
+</div>
+
+</div>
+
+
+
+
+<!-- =========================================================
+PARKING RULES MODAL
+========================================================= -->
+
+<div id="rulesModal" class="modal-bg fixed inset-0 z-[90] hidden items-center justify-center p-4">
+    <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl scrollbar">
+        <div class="border-b border-slate-100 px-5 py-4">
+            <div class="flex items-center gap-3">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-slate-900">กฎระเบียบการจองและการใช้งานรถ</h2>
+                    <p class="mt-1 text-xs text-slate-400">กรุณาอ่านและรับทราบก่อนเริ่มใช้งาน</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3 p-5 text-sm text-slate-700">
+            <div class="rounded-xl bg-blue-50 p-4"><b>1. จอดให้ตรงจุดที่จอง</b><div class="mt-1 text-xs text-slate-500">ต้องจอดตรงลานและช่องที่ระบบระบุไว้</div></div>
+            <div class="rounded-xl bg-amber-50 p-4"><b>2. การจองมีเวลา 30 นาที</b><div class="mt-1 text-xs text-slate-500">หากไม่มาใช้งานภายใน 30 นาที ระบบจะยกเลิกการจองและคืนช่องให้อัตโนมัติ</div></div>
+            <div class="rounded-xl bg-red-50 p-4"><b>3. จอดผิดช่องมีบทลงโทษ</b><div class="mt-1 text-xs text-slate-500">อาจถูกล็อกล้อและเสียค่าปรับตามระเบียบของมหาวิทยาลัย/ผู้ดูแลพื้นที่</div></div>
+            <div><b>4. ห้ามจอดกีดขวาง</b><div class="mt-1 text-xs text-slate-500">ห้ามขวางทางเข้า-ออก ทางฉุกเฉิน หรือรถคันอื่น</div></div>
+            <div><b>5. ห้ามใช้สิทธิ์การจองแทนผู้อื่น</b><div class="mt-1 text-xs text-slate-500">การจองเป็นสิทธิ์ของบัญชีผู้จองและรถที่ลงทะเบียนไว้</div></div>
+            <div><b>6. จอดรถให้อยู่ภายในเส้น</b><div class="mt-1 text-xs text-slate-500">ไม่ล้ำช่องข้างเคียงและไม่สร้างความเดือดร้อนให้ผู้ใช้คนอื่น</div></div>
+            <div><b>7. ระบบอาจใช้กล้องตรวจสอบ</b><div class="mt-1 text-xs text-slate-500">พื้นที่จอดรถอาจมีกล้องสำหรับตรวจสอบการใช้งานและความปลอดภัย</div></div>
+            <div><b>8. แจ้งปัญหาได้เมื่อพบการจอดผิดกฎ</b><div class="mt-1 text-xs text-slate-500">สามารถส่งรายละเอียด ทะเบียน สีรถ และรูปภาพประกอบผ่านระบบได้</div></div>
+            <div><b>9. ผู้ใช้รับผิดชอบทรัพย์สินของตนเอง</b><div class="mt-1 text-xs text-slate-500">ควรล็อกรถและเก็บของมีค่า ไม่ทิ้งสิ่งของไว้ในรถ</div></div>
+            <div><b>10. ฝ่าฝืนซ้ำอาจถูกระงับสิทธิ์</b><div class="mt-1 text-xs text-slate-500">ผู้ดูแลระบบสามารถระงับการจองของบัญชีที่ฝ่าฝืนกฎซ้ำได้</div></div>
+        </div>
+
+        <div class="border-t border-slate-100 p-5">
+            <button onclick="acceptParkingRules()" class="w-full rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700">
+                <i class="fa-solid fa-check mr-2"></i>รับทราบและเข้าสู่ระบบ
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- =========================================================
+REPORT MODAL
+========================================================= -->
+
+<div
+    id="reportModal"
+    class="modal-bg fixed inset-0 z-[80] hidden items-center justify-center p-4"
+>
+    <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl scrollbar">
+
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+            <div>
+                <h2 class="font-semibold text-slate-900">
+                    แจ้งปัญหาที่จอดรถ
+                </h2>
+
+                <p
+                    id="reportLocation"
+                    class="mt-1 text-xs text-slate-400"
+                >
+                    -
+                </p>
+            </div>
+
+            <button
+                onclick="closeReport()"
+                class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <form
+            id="reportForm"
+            onsubmit="submitReport(event)"
+            class="space-y-4 p-5"
+        >
+
+            <div class="rounded-xl bg-blue-50 p-4">
+
+                <div class="text-xs text-blue-500">
+                    ช่องที่เกี่ยวข้อง
+                </div>
+
+                <div
+                    id="reportSlot"
+                    class="mt-1 font-semibold text-blue-800"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label class="mb-2 block text-sm font-medium text-slate-700">
+                    ประเภทปัญหา
+                </label>
+
+                <select
+                    id="reportType"
+                    required
+                    class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                >
+
+                    <option value="">
+                        เลือกปัญหา
+                    </option>
+
+                    <option value="แย่งที่จอง">
+                        มีคนแย่งที่จอง
+                    </option>
+
+                    <option value="จอดผิดที่">
+                        จอดผิดช่อง / จอดผิดที่
+                    </option>
+
+                    <option value="จอดกีดขวาง">
+                        จอดกีดขวาง
+                    </option>
+
+                    <option value="อื่น ๆ">
+                        อื่น ๆ
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <div>
+
+                    <label class="mb-2 block text-sm font-medium text-slate-700">
+                        ทะเบียนรถที่พบ
+                    </label>
+
+                    <input
+                        id="reportPlate"
+                        type="text"
+                        required
+                        placeholder="เช่น 1กก 1234"
+                        class="w-full rounded-xl border border-slate-200 px-4 py-3 uppercase outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label class="mb-2 block text-sm font-medium text-slate-700">
+                        สีรถ
+                    </label>
+
+                    <input
+                        id="reportColor"
+                        type="text"
+                        required
+                        placeholder="เช่น ดำ"
+                        class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label class="mb-2 block text-sm font-medium text-slate-700">
+                    รายละเอียดเพิ่มเติม
+                </label>
+
+                <textarea
+                    id="reportDetail"
+                    rows="3"
+                    placeholder="ระบุรายละเอียดที่พบ..."
+                    class="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                ></textarea>
+
+            </div>
+
+
+            <div>
+
+                <label class="mb-2 block text-sm font-medium text-slate-700">
+                    รูปภาพรถ
+                </label>
+
+                <label class="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-slate-200 p-4 hover:border-red-300">
+
+                    <input
+                        id="reportImage"
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        onchange="previewReportImage(event)"
+                    >
+
+                    <div
+                        id="reportImagePreview"
+                        class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-400"
+                    >
+                        <i class="fa-solid fa-camera text-xl"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="text-sm font-medium text-slate-700">
+                            แนบรูปเพื่อช่วยตรวจสอบ
+                        </div>
+
+                        <div class="mt-1 text-xs text-slate-400">
+                            JPG / PNG (ไม่บังคับ)
+                        </div>
+
+                    </div>
+
+                </label>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <button
+                    type="button"
+                    onclick="closeReport()"
+                    class="rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600"
+                >
+                    ยกเลิก
+                </button>
+
+                <button
+                    type="submit"
+                    class="rounded-xl bg-red-600 py-3 text-sm font-medium text-white hover:bg-red-700"
+                >
+                    <i class="fa-solid fa-flag mr-1"></i>
+                    ส่ง Report
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+<!-- =========================================================
+SETTINGS
+========================================================= -->
+
+<div
+id="settingsModal"
+class="modal-bg fixed inset-0 z-50 hidden items-center justify-center p-4"
+>
+
+<div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+
+<div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+<div>
+
+<h2 class="font-semibold">
+ตั้งค่า
+</h2>
+
+<p class="mt-1 text-xs text-slate-400">
+ปรับการแสดงผลของระบบ
+</p>
+
+</div>
+
+<button
+onclick="closeSettings()"
+class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+>
+<i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
+
+
+<div class="space-y-6 p-5">
+
+
+<div>
+
+<label class="mb-3 block text-sm font-medium">
+สีตัวอักษร
+</label>
+
+<div class="grid grid-cols-5 gap-2">
+
+<button
+onclick="changeFontColor('#0f172a')"
+class="h-10 rounded-lg bg-slate-900"
+></button>
+
+<button
+onclick="changeFontColor('#334155')"
+class="h-10 rounded-lg bg-slate-700"
+></button>
+
+<button
+onclick="changeFontColor('#2563eb')"
+class="h-10 rounded-lg bg-blue-600"
+></button>
+
+<button
+onclick="changeFontColor('#059669')"
+class="h-10 rounded-lg bg-emerald-600"
+></button>
+
+<button
+onclick="changeFontColor('#7c3aed')"
+class="h-10 rounded-lg bg-violet-600"
+></button>
+
+</div>
+
+<div class="mt-3 flex items-center gap-3">
+
+<input
+id="customFontColor"
+type="color"
+value="#0f172a"
+onchange="changeFontColor(this.value)"
+class="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 p-1"
+>
+
+<span class="text-sm text-slate-500">
+เลือกสีเอง
+</span>
+
+</div>
+
+</div>
+
+
+<div>
+
+<label class="mb-3 block text-sm font-medium">
+ขนาดตัวอักษร
+</label>
+
+<div class="grid grid-cols-3 gap-2">
+
+<button
+onclick="changeFontSize('small')"
+class="rounded-xl border border-slate-200 px-3 py-3 text-sm hover:bg-slate-50"
+>
+เล็ก
+</button>
+
+<button
+onclick="changeFontSize('medium')"
+class="rounded-xl border border-slate-200 px-3 py-3 hover:bg-slate-50"
+>
+ปกติ
+</button>
+
+<button
+onclick="changeFontSize('large')"
+class="rounded-xl border border-slate-200 px-3 py-3 text-lg hover:bg-slate-50"
+>
+ใหญ่
+</button>
+
+</div>
+
+</div>
+
+
+<div>
+
+<label class="mb-3 block text-sm font-medium">
+ภาษา
+</label>
+
+<div class="grid grid-cols-2 gap-2">
+
+<button
+onclick="changeLanguage('th')"
+class="rounded-xl border border-slate-200 px-3 py-3 hover:bg-slate-50"
+>
+🇹🇭 ภาษาไทย
+</button>
+
+<button
+onclick="changeLanguage('en')"
+class="rounded-xl border border-slate-200 px-3 py-3 hover:bg-slate-50"
+>
+🇬🇧 English
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================================================
+TOAST
+========================================================= -->
+
+<div
+id="toast"
+class="fixed left-1/2 top-6 z-[100] hidden w-[calc(100%-32px)] max-w-sm -translate-x-1/2"
+>
+
+<div
+id="toastBox"
+class="rounded-2xl border border-slate-200 bg-white p-4 shadow-xl popup-enter"
+>
+
+<div class="flex items-start gap-3">
+
+<div
+id="toastIcon"
+class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"
+>
+<i class="fa-solid fa-check"></i>
+</div>
+
+<div class="min-w-0 flex-1">
+
+<h3 id="toastTitle" class="font-medium">
+สำเร็จ
+</h3>
+
+<p
+id="toastMessage"
+class="mt-1 text-sm leading-5 text-slate-500"
+>
+ดำเนินการเรียบร้อยแล้ว
+</p>
+
+</div>
+
+<button
+onclick="closeToast()"
+class="text-slate-400"
+>
+<i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================================================
+CONFIRM
+========================================================= -->
+
+<div
+id="confirmModal"
+class="fixed inset-0 z-[110] hidden items-center justify-center bg-slate-900/40 p-4"
+>
+
+<div class="confirm-enter w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+<i class="fa-solid fa-circle-question text-xl"></i>
+</div>
+
+<h3
+id="confirmTitle"
+class="mt-4 text-lg font-semibold"
+>
+ยืนยันการทำรายการ
+</h3>
+
+<p
+id="confirmMessage"
+class="mt-2 text-sm leading-6 text-slate-500"
+>
+ต้องการดำเนินการต่อหรือไม่?
+</p>
+
+<div class="mt-5 grid grid-cols-2 gap-3">
+
+<button
+onclick="closeConfirm()"
+class="rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
+>
+ยกเลิก
+</button>
+
+<button
+id="confirmButton"
+class="rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
+>
+ยืนยัน
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+
+/* =========================================================
+   REPORT
+========================================================= */
+
+let reportImageData = "";
+let reportTarget = null;
+let reservationTimer = null;
+const RESERVATION_LIMIT = 30 * 60 * 1000;
+
+
+function openReportFromReservation(){
+
+    const reservation = getReservation();
+
+    if(!reservation){
+
+        showToast(
+            "ยังไม่มีการจอง จึงไม่สามารถแจ้งปัญหาได้",
+            "info",
+            "ไม่มีการจอง"
+        );
+
+        return;
+    }
+
+    openReport(
+        reservation.lotId,
+        reservation.slotId
+    );
+}
+
+
+
+function openReport(lotId, slotId){
+
+    const lot =
+        parkingLots.find(
+            l => l.id === lotId
+        );
+
+    if(!lot) return;
+
+
+    reportTarget = {
+        lotId,
+        slotId
+    };
+
+    reportImageData = "";
+
+
+    document.getElementById(
+        "reportLocation"
+    ).textContent =
+        lot.nameTH;
+
+
+    document.getElementById(
+        "reportSlot"
+    ).textContent =
+        `ช่องจอด ${slotId}`;
+
+
+    document.getElementById(
+        "reportType"
+    ).value = "";
+
+
+    document.getElementById(
+        "reportPlate"
+    ).value = "";
+
+
+    document.getElementById(
+        "reportColor"
+    ).value = "";
+
+
+    document.getElementById(
+        "reportDetail"
+    ).value = "";
+
+
+    document.getElementById(
+        "reportImage"
+    ).value = "";
+
+
+    document.getElementById(
+        "reportImagePreview"
+    ).innerHTML =
+        '<i class="fa-solid fa-camera text-xl"></i>';
+
+
+    const modal =
+        document.getElementById(
+            "reportModal"
+        );
+
+    modal.classList.remove("hidden");
+
+    modal.classList.add("flex");
+}
+
+
+
+function closeReport(){
+
+    const modal =
+        document.getElementById(
+            "reportModal"
+        );
+
+    if(!modal) return;
+
+
+    modal.classList.add("hidden");
+
+    modal.classList.remove("flex");
+
+
+    reportTarget = null;
+
+    reportImageData = "";
+}
+
+
+
+function previewReportImage(event){
+
+    const file =
+        event.target.files[0];
+
+    if(!file) return;
+
+
+    if(!file.type.startsWith("image/")){
+
+        showToast(
+            "กรุณาเลือกไฟล์รูปภาพ",
+            "error",
+            "ไฟล์ไม่ถูกต้อง"
+        );
+
+        return;
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function(e){
+
+        reportImageData =
+            e.target.result;
+
+
+        document.getElementById(
+            "reportImagePreview"
+        ).innerHTML = `
+
+            <img
+                src="${reportImageData}"
+                class="h-full w-full object-cover"
+            >
+
+        `;
+
+    };
+
+
+    reader.readAsDataURL(file);
+}
+
+
+
+function submitReport(event){
+
+    event.preventDefault();
+
+
+    if(!reportTarget) return;
+
+
+    const account =
+        JSON.parse(
+            localStorage.getItem(
+                "jodmangkasai_account"
+            ) || "null"
+        );
+
+
+    const lot =
+        parkingLots.find(
+            l =>
+                l.id === reportTarget.lotId
+        );
+
+
+    const report = {
+
+        id:
+            "RPT-" +
+            Date.now(),
+
+        lotId:
+            reportTarget.lotId,
+
+        lotName:
+            lot
+                ? lot.nameTH
+                : "",
+
+        slotId:
+            reportTarget.slotId,
+
+        type:
+            document.getElementById(
+                "reportType"
+            ).value,
+
+        plate:
+            document.getElementById(
+                "reportPlate"
+            ).value
+                .trim()
+                .toUpperCase(),
+
+        color:
+            document.getElementById(
+                "reportColor"
+            ).value
+                .trim(),
+
+        detail:
+            document.getElementById(
+                "reportDetail"
+            ).value
+                .trim(),
+
+        image:
+            reportImageData,
+
+        reporter:
+            account?.email ||
+            "guest",
+
+        createdAt:
+            new Date().toISOString(),
+
+        status:
+            "รอตรวจสอบ"
+
+    };
+
+
+    const reports =
+        JSON.parse(
+            localStorage.getItem(
+                "jodmangkasai_reports"
+            ) || "[]"
+        );
+
+
+    reports.unshift(report);
+
+
+    localStorage.setItem(
+        "jodmangkasai_reports",
+        JSON.stringify(reports)
+    );
+
+
+    closeReport();
+
+
+    showToast(
+        `ส่ง Report ${report.id} เรียบร้อยแล้ว`,
+        "success",
+        "แจ้งปัญหาสำเร็จ"
+    );
+
+}
+
+
+
+/* =========================================================
+PARKING DATA
+========================================================= */
+
+const parkingLots = [
+
+{
+id:"rbp",
+nameTH:"ลานจอดรถอาคารเรียน",
+nameEN:"Academic Building Parking",
+locationTH:"มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+locationEN:"Rajamangala University of Technology Thanyaburi",
+total:12,
+available:8,
+mapQuery:"มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+typeTH:"ทั่วไป",
+typeEN:"General",
+camera:"CAM-01"
+},
+
+{
+id:"canteen",
+nameTH:"ลานจอดรถโรงอาหาร",
+nameEN:"Canteen Parking",
+locationTH:"โรงอาหาร มทร.ธัญบุรี",
+locationEN:"Canteen, RMUTT",
+total:16,
+available:5,
+mapQuery:"โรงอาหาร มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+typeTH:"ทั่วไป",
+typeEN:"General",
+camera:"CAM-02"
+},
+
+{
+id:"gym",
+nameTH:"ลานจอดรถสนามกีฬา",
+nameEN:"Sports Center Parking",
+locationTH:"สนามกีฬา มทร.ธัญบุรี",
+locationEN:"Sports Center, RMUTT",
+total:10,
+available:7,
+mapQuery:"สนามกีฬา มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+typeTH:"ทั่วไป",
+typeEN:"General",
+camera:"CAM-03"
+},
+
+{
+id:"engineering",
+nameTH:"ลานจอดรถคณะวิศวกรรมศาสตร์",
+nameEN:"Engineering Parking",
+locationTH:"คณะวิศวกรรมศาสตร์ มทร.ธัญบุรี",
+locationEN:"Faculty of Engineering, RMUTT",
+total:20,
+available:9,
+mapQuery:"คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+typeTH:"นักศึกษา",
+typeEN:"Student",
+camera:"CAM-04"
+},
+
+{
+id:"library",
+nameTH:"ลานจอดรถหอสมุด",
+nameEN:"Library Parking",
+locationTH:"หอสมุด มทร.ธัญบุรี",
+locationEN:"Library, RMUTT",
+total:14,
+available:6,
+mapQuery:"หอสมุด มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+typeTH:"ทั่วไป",
+typeEN:"General",
+camera:"CAM-05"
+},
+
+{
+id:"dorm",
+nameTH:"ลานจอดรถหอพัก",
+nameEN:"Dormitory Parking",
+locationTH:"หอพัก มทร.ธัญบุรี",
+locationEN:"Dormitory, RMUTT",
+total:18,
+available:11,
+mapQuery:"หอพัก มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี",
+typeTH:"นักศึกษา",
+typeEN:"Student",
+camera:"CAM-06"
+},
+
+{
+id:"activity",
+nameTH:"ลานจอดรถอาคารกิจกรรม",
+nameEN:"Activity Building Parking",
+locationTH:"อาคารกิจกรรม มทร.ธัญบุรี",
+locationEN:"Activity Building, RMUTT",
+total:15,
+available:4,
+mapQuery:"มหาวิทยาลัยเทคโนโลยีราชมงคลธัญบุรี อาคารกิจกรรม",
+typeTH:"ทั่วไป",
+typeEN:"General",
+camera:"CAM-07"
+}
+
+];
+
+
+/* =========================================================
+STATE
+========================================================= */
+
+let currentLang =
+localStorage.getItem("jodmangkasai_language") || "th";
+
+let currentLot = null;
+
+let selectedSlot = null;
+
+let toastTimer = null;
+
+let confirmAction = null;
+
+let cameraStream = null;
+
+let registerCarImageData = "";
+
+
+/* =========================================================
+PAGE
+========================================================= */
+
+function showWelcome(){
+
+document.getElementById("welcomePage").classList.remove("hidden-view");
+document.getElementById("authPage").classList.add("hidden-view");
+document.getElementById("appPage").classList.add("hidden-view");
+
+}
+
+
+function showLogin(){
+
+document.getElementById("welcomePage").classList.add("hidden-view");
+document.getElementById("authPage").classList.remove("hidden-view");
+document.getElementById("appPage").classList.add("hidden-view");
+
+switchAuth("login");
+
+}
+
+
+function showApp(){
+
+document.getElementById("welcomePage").classList.add("hidden-view");
+document.getElementById("authPage").classList.add("hidden-view");
+document.getElementById("appPage").classList.remove("hidden-view");
+
+showDashboard();
+
+updateDashboard();
+
+}
+
+
+/* =========================================================
+AUTH
+========================================================= */
+
+function switchAuth(type){
+
+document.getElementById("loginForm").classList.add("hidden");
+document.getElementById("registerFormStep1").classList.add("hidden");
+document.getElementById("registerFormStep2").classList.add("hidden");
+
+document.getElementById("registerProgress").classList.add("hidden");
+
+if(type==="login"){
+
+document.getElementById("loginForm").classList.remove("hidden");
+
+document.getElementById("loginTab").className =
+"rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm";
+
+document.getElementById("registerTab").className =
+"rounded-lg px-4 py-2 text-sm text-slate-500";
+
+}else{
+
+document.getElementById("registerFormStep1").classList.remove("hidden");
+
+document.getElementById("registerProgress").classList.remove("hidden");
+
+document.getElementById("loginTab").className =
+"rounded-lg px-4 py-2 text-sm text-slate-500";
+
+document.getElementById("registerTab").className =
+"rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm";
+
+}
+
+}
+
+
+function nextRegisterStep(event){
+
+event.preventDefault();
+
+const password =
+document.getElementById("registerPassword").value;
+
+if(password.length < 6){
+
+showToast(
+"รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+"error",
+"สมัครสมาชิกไม่สำเร็จ"
+);
+
+return;
+}
+
+document.getElementById("registerFormStep1").classList.add("hidden");
+
+document.getElementById("registerFormStep2").classList.remove("hidden");
+
+document.getElementById("stepOneCircle").className =
+"flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm text-white";
+
+document.getElementById("stepTwoCircle").className =
+"flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm text-white";
+
+document.getElementById("progressBar").classList.remove("w-1/2");
+document.getElementById("progressBar").classList.add("w-full");
+
+}
+
+
+function previousRegisterStep(){
+
+document.getElementById("registerFormStep2").classList.add("hidden");
+
+document.getElementById("registerFormStep1").classList.remove("hidden");
+
+document.getElementById("stepOneCircle").className =
+"flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm text-white";
+
+document.getElementById("stepTwoCircle").className =
+"flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-sm text-slate-500";
+
+document.getElementById("progressBar").classList.remove("w-full");
+document.getElementById("progressBar").classList.add("w-1/2");
+
+}
+
+
+function previewCarImage(event){
+
+const file =
+event.target.files[0];
+
+if(!file) return;
+
+if(!file.type.startsWith("image/")){
+
+showToast(
+"กรุณาเลือกไฟล์รูปภาพ",
+"error",
+"ไฟล์ไม่ถูกต้อง"
+);
+
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+registerCarImageData = e.target.result;
+
+document.getElementById("carImagePreview").innerHTML = `
+
+<img
+src="${registerCarImageData}"
+class="h-full w-full object-cover"
+>
+
+`;
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+
+function completeRegister(event){
+
+event.preventDefault();
+
+const name =
+document.getElementById("registerName").value.trim();
+
+const email =
+document.getElementById("registerEmail").value.trim().toLowerCase();
+
+const password =
+document.getElementById("registerPassword").value;
+
+const plate =
+document.getElementById("registerPlate").value.trim();
+
+const carModel =
+document.getElementById("registerCarModel").value.trim();
+
+const carColor =
+document.getElementById("registerCarColor").value.trim();
+
+if(!name || !email || !password || !plate || !carModel || !carColor){
+
+showToast(
+"กรุณากรอกข้อมูลให้ครบทุกช่อง",
+"error",
+"ข้อมูลไม่ครบ"
+);
+
+return;
+}
+
+const account = {
+
+name,
+email,
+password,
+
+vehicle:{
+plate,
+model:carModel,
+color:carColor,
+image:registerCarImageData || ""
+}
+
+};
+
+localStorage.setItem(
+"jodmangkasai_account",
+JSON.stringify(account)
+);
+
+document.getElementById("loginEmail").value = email;
+document.getElementById("loginPassword").value = password;
+
+registerCarImageData = "";
+
+switchAuth("login");
+
+showToast(
+"สร้างบัญชีและบันทึกข้อมูลรถเรียบร้อยแล้ว",
+"success",
+"สมัครสมาชิกสำเร็จ"
+);
+
+}
+
+
+function login(event){
+
+event.preventDefault();
+
+const email =
+document.getElementById("loginEmail").value.trim().toLowerCase();
+
+const password =
+document.getElementById("loginPassword").value;
+
+const account =
+JSON.parse(
+localStorage.getItem("jodmangkasai_account") || "null"
+);
+
+if(!account){
+
+showToast(
+"กรุณาสมัครสมาชิกก่อนเข้าสู่ระบบ",
+"info",
+"ยังไม่มีบัญชี"
+);
+
+switchAuth("register");
+
+return;
+}
+
+if(email !== account.email || password !== account.password){
+
+showToast(
+"อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+"error",
+"เข้าสู่ระบบไม่สำเร็จ"
+);
+
+return;
+}
+
+localStorage.setItem(
+"jodmangkasai_logged_in",
+"true"
+);
+
+showApp();
+startReservationTimer();
+
+if(localStorage.getItem("jodmangkasai_rules_accepted") !== "true"){
+    openParkingRules();
+}
+
+showToast(
+"เข้าสู่ระบบเรียบร้อยแล้ว",
+"success",
+"ยินดีต้อนรับ"
+);
+
+}
+
+
+/* =========================================================
+LOGOUT
+========================================================= */
+
+function logout(){
+
+showConfirm(
+"ออกจากระบบ",
+"เมื่อออกจากระบบ การจองปัจจุบันจะถูกยกเลิกและสามารถจองใหม่ได้เมื่อเข้าสู่ระบบอีกครั้ง",
+function(){
+
+resetReservation();
+
+localStorage.removeItem(
+"jodmangkasai_logged_in"
+);
+
+currentLot = null;
+
+showWelcome();
+
+showToast(
+"ออกจากระบบและรีเซ็ตการจองแล้ว",
+"success",
+"ออกจากระบบ"
+);
+
+}
+);
+
+}
+
+
+/* =========================================================
+RESERVATION RESET
+========================================================= */
+
+function resetReservation(){
+
+const reservation =
+getReservation();
+
+if(!reservation) return;
+
+const lot =
+parkingLots.find(
+l => l.id === reservation.lotId
+);
+
+if(lot){
+
+const slots =
+getSlots(lot);
+
+const slot =
+slots.find(
+s => s.id === reservation.slotId
+);
+
+if(slot && slot.status==="reserved"){
+slot.status="available";
+}
+
+saveSlots(lot.id,slots);
+
+}
+
+localStorage.removeItem(
+"jodmangkasai_reservation"
+);
+
+}
+
+
+/* =========================================================
+SLOTS
+========================================================= */
+
+function getSlots(lot){
+
+const key =
+`jodmangkasai_slots_${lot.id}`;
+
+const saved =
+JSON.parse(
+localStorage.getItem(key) || "null"
+);
+
+if(saved && saved.length===lot.total){
+return saved;
+}
+
+const slots=[];
+
+for(let i=1;i<=lot.total;i++){
+
+slots.push({
+
+id:i,
+
+status:
+i<=lot.available
+?"available"
+:"occupied"
+
+});
+
+}
+
+localStorage.setItem(
+key,
+JSON.stringify(slots)
+);
+
+return slots;
+
+}
+
+
+function saveSlots(lotId,slots){
+
+localStorage.setItem(
+`jodmangkasai_slots_${lotId}`,
+JSON.stringify(slots)
+);
+
+}
+
+
+function getAvailableCount(lot){
+
+return getSlots(lot)
+.filter(s=>s.status==="available")
+.length;
+
+}
+
+
+function getOccupiedCount(lot){
+
+return getSlots(lot)
+.filter(
+s =>
+s.status==="occupied" ||
+s.status==="reserved"
+)
+.length;
+
+}
+
+
+/* =========================================================
+DASHBOARD
+========================================================= */
+
+function renderParkingLots(){
+
+const container =
+document.getElementById("parkingList");
+
+container.innerHTML="";
+
+parkingLots.forEach(lot=>{
+
+const available =
+getAvailableCount(lot);
+
+const percent =
+Math.round((available/lot.total)*100);
+
+let statusText =
+available===0
+?"เต็ม"
+:percent<=25
+?"ใกล้เต็ม"
+:"มีที่ว่าง";
+
+let statusClass =
+available===0
+?"text-red-600 bg-red-50"
+:percent<=25
+?"text-amber-600 bg-amber-50"
+:"text-emerald-600 bg-emerald-50";
+
+const name =
+currentLang==="th"
+?lot.nameTH
+:lot.nameEN;
+
+const type =
+currentLang==="th"
+?lot.typeTH
+:lot.typeEN;
+
+container.innerHTML += `
+
+<div
+class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+>
+
+<div class="flex items-start justify-between gap-3">
+
+<button
+onclick="openParking('${lot.id}')"
+class="flex min-w-0 flex-1 items-center gap-3 text-left"
+>
+
+<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+<i class="fa-solid fa-square-parking"></i>
+</div>
+
+<div class="min-w-0">
+
+<h3 class="truncate font-medium text-slate-900">
+${name}
+</h3>
+
+<p class="mt-1 text-xs text-slate-400">
+${type}
+</p>
+
+</div>
+
+</button>
+
+<span class="rounded-full px-2.5 py-1 text-xs ${statusClass}">
+${statusText}
+</span>
+
+</div>
+
+
+<div class="mt-5">
+
+<div class="mb-2 flex justify-between text-sm">
+
+<span class="text-slate-500">
+ที่ว่าง
+</span>
+
+<span class="font-medium">
+${available}/${lot.total}
+</span>
+
+</div>
+
+<div class="h-2 overflow-hidden rounded-full bg-slate-100">
+
+<div
+class="h-full rounded-full bg-blue-500"
+style="width:${percent}%"
+></div>
+
+</div>
+
+</div>
+
+
+<div class="mt-4 grid grid-cols-2 gap-2">
+
+<button
+onclick="openParking('${lot.id}')"
+class="rounded-xl border border-slate-200 py-2 text-sm text-slate-700 hover:bg-slate-50"
+>
+<i class="fa-solid fa-square-parking mr-1 text-blue-600"></i>
+ดูช่องจอด
+</button>
+
+<button
+onclick="openCamera('${lot.id}')"
+class="rounded-xl bg-slate-900 py-2 text-sm text-white hover:bg-slate-800"
+>
+<i class="fa-solid fa-video mr-1"></i>
+ดูกล้อง
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+function updateDashboard(){
+
+let totalAvailable=0;
+let totalOccupied=0;
+
+parkingLots.forEach(lot=>{
+
+totalAvailable += getAvailableCount(lot);
+totalOccupied += getOccupiedCount(lot);
+
+});
+
+document.getElementById("totalLots").textContent =
+parkingLots.length;
+
+document.getElementById("totalAvailable").textContent =
+totalAvailable;
+
+document.getElementById("totalOccupied").textContent =
+totalOccupied;
+
+const reservation =
+getReservation();
+
+document.getElementById("myReservationStatus").textContent =
+reservation
+?`ช่อง ${reservation.slotId}`
+:"ไม่มี";
+
+const account =
+JSON.parse(
+localStorage.getItem("jodmangkasai_account") || "null"
+);
+
+if(account){
+
+document.getElementById("welcomeText").textContent =
+`สวัสดี ${account.name}`;
+
+}
+
+renderCurrentReservation();
+
+}
+
+
+/* =========================================================
+CURRENT RESERVATION CARD
+========================================================= */
+
+function renderCurrentReservation(){
+
+const card =
+document.getElementById("reservationCard");
+
+const reservation =
+getReservation();
+
+if(!reservation){
+
+card.classList.add("hidden");
+return;
+
+}
+
+const lot =
+parkingLots.find(
+l=>l.id===reservation.lotId
+);
+
+if(!lot){
+
+card.classList.add("hidden");
+return;
+
+}
+
+const account =
+JSON.parse(
+localStorage.getItem("jodmangkasai_account") || "null"
+);
+
+const vehicle =
+account?.vehicle || {};
+
+const lotName =
+currentLang==="th"
+?lot.nameTH
+:lot.nameEN;
+
+card.classList.remove("hidden");
+
+card.innerHTML = `
+
+<div class="border-b border-blue-100 bg-blue-50 px-5 py-3">
+
+<div class="flex items-center justify-between">
+
+<div class="flex items-center gap-2 text-blue-700">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<span class="font-medium">
+จองที่จอดรถอยู่
+</span>
+
+</div>
+
+<span class="text-xs text-blue-500">
+${vehicle.plate || "-"}
+</span>
+
+</div>
+
+</div>
+
+
+<div class="p-5">
+
+<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+<div>
+
+<div class="text-xs text-slate-400">
+สถานที่
+</div>
+
+<h3 class="mt-1 text-lg font-semibold">
+${lotName}
+</h3>
+
+<p class="mt-1 text-sm text-slate-500">
+ช่องจอด ${reservation.slotId}
+</p>
+
+<div class="mt-3 inline-flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+<i class="fa-solid fa-clock"></i>
+<span>เหลือ</span>
+<strong data-reservation-timer>30:00</strong>
+</div>
+
+</div>
+
+<div class="flex gap-2">
+
+<button
+onclick="openMyReservation()"
+class="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+>
+ดูรายละเอียด
+</button>
+
+<button
+onclick="openCamera('${lot.id}')"
+class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+>
+<i class="fa-solid fa-video mr-1"></i>
+กล้อง
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+SEARCH
+========================================================= */
+
+function searchParking(forceOpen=false){
+
+const input =
+document.getElementById("searchInput");
+
+const keyword =
+input.value.trim().toLowerCase();
+
+const results =
+document.getElementById("searchResults");
+
+if(!keyword && !forceOpen){
+
+results.classList.add("hidden");
+return;
+
+}
+
+const list =
+keyword
+?parkingLots.filter(lot=>{
+
+const text =
+(
+lot.nameTH+" "+
+lot.nameEN+" "+
+lot.typeTH+" "+
+lot.typeEN
+).toLowerCase();
+
+return text.includes(keyword);
+
+})
+:parkingLots;
+
+results.innerHTML="";
+
+list.forEach(lot=>{
+
+const available =
+getAvailableCount(lot);
+
+const name =
+currentLang==="th"
+?lot.nameTH
+:lot.nameEN;
+
+results.innerHTML += `
+
+<button
+onclick="openParking('${lot.id}')"
+class="search-result flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left"
+>
+
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+<i class="fa-solid fa-location-dot"></i>
+</div>
+
+<div class="min-w-0 flex-1">
+
+<div class="truncate font-medium">
+${name}
+</div>
+
+<div class="mt-1 text-xs text-slate-400">
+ว่าง ${available} จาก ${lot.total} ช่อง
+</div>
+
+</div>
+
+<i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+
+</button>
+
+`;
+
+});
+
+if(list.length===0){
+
+results.innerHTML=`
+
+<div class="px-4 py-8 text-center text-sm text-slate-500">
+<i class="fa-solid fa-magnifying-glass text-xl text-slate-300"></i>
+<p class="mt-3">
+ไม่พบลานจอดรถที่ค้นหา
+</p>
+</div>
+
+`;
+
+}
+
+results.classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+OPEN PARKING
+========================================================= */
+
+function showDashboard(){
+
+document.getElementById("dashboardView").classList.remove("hidden");
+
+document.getElementById("parkingDetailView").classList.add("hidden");
+
+document.getElementById("myReservationView").classList.add("hidden");
+
+document.getElementById("searchResults").classList.add("hidden");
+
+renderParkingLots();
+updateDashboard();
+
+}
+
+
+function openParking(lotId){
+
+currentLot =
+parkingLots.find(l=>l.id===lotId);
+
+if(!currentLot)return;
+
+document.getElementById("dashboardView").classList.add("hidden");
+
+document.getElementById("myReservationView").classList.add("hidden");
+
+document.getElementById("parkingDetailView").classList.remove("hidden");
+
+document.getElementById("searchResults").classList.add("hidden");
+
+renderParkingDetail();
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+/* =========================================================
+PARKING DETAIL
+========================================================= */
+
+function renderParkingDetail(){
+
+const lot=currentLot;
+
+if(!lot)return;
+
+const slots=getSlots(lot);
+
+const available =
+slots.filter(s=>s.status==="available").length;
+
+const occupied =
+slots.filter(s=>s.status==="occupied").length;
+
+const reserved =
+slots.filter(s=>s.status==="reserved").length;
+
+const name =
+currentLang==="th"
+?lot.nameTH
+:lot.nameEN;
+
+const location =
+currentLang==="th"
+?lot.locationTH
+:lot.locationEN;
+
+let slotsHTML="";
+
+slots.forEach(slot=>{
+
+let bg="bg-emerald-50";
+let text="text-emerald-700";
+let icon="fa-check";
+let label="ว่าง";
+
+if(slot.status==="occupied"){
+
+bg="bg-slate-100";
+text="text-slate-400";
+icon="fa-car";
+label="ไม่ว่าง";
+
+}
+
+if(slot.status==="reserved"){
+
+bg="bg-amber-50";
+text="text-amber-700";
+icon="fa-bookmark";
+label="จองแล้ว";
+
+}
+
+slotsHTML += `
+
+<button
+onclick="openSlot('${lot.id}',${slot.id})"
+class="slot ${bg} ${text} min-h-[90px] rounded-xl border border-slate-200 p-3"
+>
+
+<div class="text-xs opacity-70">
+ช่อง
+</div>
+
+<div class="mt-1 text-xl font-semibold">
+${slot.id}
+</div>
+
+<i class="fa-solid ${icon} mt-1 text-xs"></i>
+
+<div class="mt-1 text-[11px]">
+${label}
+</div>
+
+</button>
+
+`;
+
+});
+
+
+document.getElementById("parkingDetail").innerHTML=`
+
+<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+<div>
+
+<div class="flex items-center gap-3">
+
+<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+<i class="fa-solid fa-square-parking text-xl"></i>
+</div>
+
+<div>
+
+<h1 class="text-xl font-semibold">
+${name}
+</h1>
+
+<p class="mt-1 text-sm text-slate-400">
+${location}
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="flex gap-2">
+
+<button
+onclick="openCamera('${lot.id}')"
+class="rounded-xl bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
+>
+<i class="fa-solid fa-video mr-2"></i>
+ดูกล้อง
+</button>
+
+<button
+onclick="openGoogleMaps('${encodeURIComponent(lot.mapQuery)}')"
+class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700"
+>
+<i class="fa-solid fa-map-location-dot mr-2 text-blue-600"></i>
+แผนที่
+</button>
+
+</div>
+
+</div>
+
+
+<div class="mt-6 grid grid-cols-3 gap-3">
+
+<div class="rounded-xl bg-emerald-50 p-4 text-center">
+<div class="text-2xl font-semibold text-emerald-600">
+${available}
+</div>
+<div class="mt-1 text-xs text-emerald-700">
+ว่าง
+</div>
+</div>
+
+<div class="rounded-xl bg-slate-100 p-4 text-center">
+<div class="text-2xl font-semibold">
+${occupied}
+</div>
+<div class="mt-1 text-xs text-slate-500">
+ไม่ว่าง
+</div>
+</div>
+
+<div class="rounded-xl bg-amber-50 p-4 text-center">
+<div class="text-2xl font-semibold text-amber-600">
+${reserved}
+</div>
+<div class="mt-1 text-xs text-amber-700">
+จองแล้ว
+</div>
+</div>
+
+</div>
+
+
+<div class="mt-7">
+
+<div class="mb-3 flex items-center justify-between">
+
+<h2 class="font-medium">
+ช่องจอดรถ
+</h2>
+
+<span class="text-xs text-slate-400">
+แตะช่องเพื่อดูรายละเอียด
+</span>
+
+</div>
+
+<div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+${slotsHTML}
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+SLOT MODAL
+========================================================= */
+
+function openSlot(lotId,slotId){
+
+const lot =
+parkingLots.find(l=>l.id===lotId);
+
+if(!lot)return;
+
+const slots=getSlots(lot);
+
+const slot =
+slots.find(s=>s.id===slotId);
+
+if(!slot)return;
+
+selectedSlot={
+lotId,
+slotId
+};
+
+const content =
+document.getElementById("slotModalContent");
+
+let statusHTML="";
+let buttonHTML="";
+
+if(slot.status==="available"){
+
+statusHTML=`
+
+<div class="rounded-xl bg-emerald-50 p-4 text-center">
+
+<div class="text-2xl font-semibold text-emerald-600">
+ว่าง
+</div>
+
+<div class="mt-1 text-sm text-emerald-700">
+สามารถจองช่องนี้ได้
+</div>
+
+</div>
+
+`;
+
+buttonHTML=`
+
+<button
+onclick="confirmReserve()"
+class="mt-5 w-full rounded-xl bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
+>
+<i class="fa-solid fa-bookmark mr-2"></i>
+จองช่องนี้
+</button>
+
+`;
+
+}else if(slot.status==="reserved"){
+
+statusHTML=`
+
+<div class="rounded-xl bg-amber-50 p-4 text-center">
+
+<div class="text-2xl font-semibold text-amber-600">
+จองแล้ว
+</div>
+
+<div class="mt-1 text-sm text-amber-700">
+ช่องนี้เป็นการจองของคุณ
+</div>
+
+</div>
+
+`;
+
+buttonHTML=`
+
+<button
+onclick="confirmCancelReservation()"
+class="mt-5 w-full rounded-xl border border-red-200 bg-red-50 py-3 font-medium text-red-600"
+>
+ยกเลิกการจอง
+</button>
+
+`;
+
+}else{
+
+statusHTML=`
+
+<div class="rounded-xl bg-slate-100 p-4 text-center">
+
+<div class="text-2xl font-semibold text-slate-500">
+ไม่ว่าง
+</div>
+
+<div class="mt-1 text-sm text-slate-400">
+ช่องนี้กำลังถูกใช้งาน
+</div>
+
+</div>
+
+`;
+
+}
+
+content.innerHTML=`
+
+<div class="mb-5 flex items-center gap-4">
+
+<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-xl font-semibold text-blue-600">
+${slot.id}
+</div>
+
+<div>
+
+<div class="text-sm text-slate-400">
+ช่องจอด
+</div>
+
+<div class="font-medium">
+${currentLang==="th"?lot.nameTH:lot.nameEN}
+</div>
+
+</div>
+
+</div>
+
+${statusHTML}
+
+${buttonHTML}
+
+`;
+
+const modal =
+document.getElementById("slotModal");
+
+modal.classList.remove("hidden");
+modal.classList.add("flex");
+
+}
+
+
+function closeSlotModal(){
+
+document.getElementById("slotModal").classList.add("hidden");
+document.getElementById("slotModal").classList.remove("flex");
+
+selectedSlot=null;
+
+}
+
+
+/* =========================================================
+RESERVATION
+========================================================= */
+
+function getReservation(){
+
+return JSON.parse(
+localStorage.getItem("jodmangkasai_reservation") || "null"
+);
+
+}
+
+
+function confirmReserve(){
+
+if(!selectedSlot)return;
+
+const account =
+JSON.parse(
+localStorage.getItem("jodmangkasai_account") || "null"
+);
+
+if(!account?.vehicle){
+
+showToast(
+"ไม่พบข้อมูลรถ กรุณาสมัครสมาชิกใหม่",
+"error",
+"ไม่พบข้อมูลรถ"
+);
+
+return;
+}
+
+showConfirm(
+"ยืนยันการจอง",
+`ต้องการจองช่อง ${selectedSlot.slotId} ใช้รถทะเบียน ${account.vehicle.plate} ใช่หรือไม่?`,
+reserveSlot
+);
+
+}
+
+
+function reserveSlot(){
+
+if(!selectedSlot)return;
+
+const oldReservation=getReservation();
+
+if(oldReservation){
+
+showToast(
+"คุณมีการจองอยู่แล้ว กรุณายกเลิกการจองเดิมก่อน",
+"info",
+"มีการจองอยู่แล้ว"
+);
+
+return;
+}
+
+const lot =
+parkingLots.find(l=>l.id===selectedSlot.lotId);
+
+if(!lot)return;
+
+const slots=getSlots(lot);
+
+const slot =
+slots.find(s=>s.id===selectedSlot.slotId);
+
+if(!slot || slot.status!=="available"){
+
+closeSlotModal();
+
+showToast(
+"ช่องนี้ไม่สามารถจองได้แล้ว",
+"error",
+"จองไม่สำเร็จ"
+);
+
+renderParkingDetail();
+
+return;
+}
+
+const account =
+JSON.parse(
+localStorage.getItem("jodmangkasai_account") || "null"
+);
+
+slot.status="reserved";
+
+saveSlots(lot.id,slots);
+
+localStorage.setItem(
+"jodmangkasai_reservation",
+JSON.stringify({
+
+lotId:lot.id,
+slotId:slot.id,
+
+reservedAt:
+new Date().toISOString(),
+
+expiresAt:
+new Date(Date.now() + RESERVATION_LIMIT).toISOString(),
+
+vehicle:{
+plate:account.vehicle.plate,
+model:account.vehicle.model,
+color:account.vehicle.color,
+image:account.vehicle.image || ""
+}
+
+})
+);
+
+closeSlotModal();
+
+renderParkingDetail();
+
+updateDashboard();
+startReservationTimer();
+
+showToast(
+`จองช่อง ${slot.id} เรียบร้อยแล้ว`,
+"success",
+"จองสำเร็จ"
+);
+
+}
+
+
+function confirmCancelReservation(){
+
+showConfirm(
+"ยกเลิกการจอง",
+"คุณต้องการยกเลิกการจองช่องนี้ใช่หรือไม่?",
+cancelReservation
+);
+
+}
+
+
+function cancelReservation(){
+
+const reservation=getReservation();
+
+if(!reservation){
+
+closeSlotModal();
+return;
+
+}
+
+const lot =
+parkingLots.find(l=>l.id===reservation.lotId);
+
+if(lot){
+
+const slots=getSlots(lot);
+
+const slot =
+slots.find(s=>s.id===reservation.slotId);
+
+if(slot){
+slot.status="available";
+}
+
+saveSlots(lot.id,slots);
+
+}
+
+localStorage.removeItem(
+"jodmangkasai_reservation"
+);
+clearInterval(reservationTimer);
+
+closeSlotModal();
+
+renderParkingDetail();
+
+updateDashboard();
+
+showToast(
+"ยกเลิกการจองเรียบร้อยแล้ว",
+"success",
+"ยกเลิกสำเร็จ"
+);
+
+}
+
+
+/* =========================================================
+RESERVATION TIMER + RULES
+========================================================= */
+
+function getReservationRemaining(){
+    const reservation=getReservation();
+    if(!reservation || !reservation.reservedAt) return 0;
+
+    const start=new Date(reservation.reservedAt).getTime();
+    const expire=new Date(
+        reservation.expiresAt || (start + RESERVATION_LIMIT)
+    ).getTime();
+
+    return Math.max(0, expire-Date.now());
+}
+
+function formatReservationTime(ms){
+    const total=Math.max(0,Math.floor(ms/1000));
+    const minutes=Math.floor(total/60);
+    const seconds=total%60;
+    return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+}
+
+function updateReservationTimerUI(remaining){
+    document.querySelectorAll("[data-reservation-timer]").forEach(el=>{
+        el.textContent=formatReservationTime(remaining);
+        el.classList.toggle("text-red-600",remaining<=5*60*1000);
+        el.classList.toggle("text-amber-600",remaining>5*60*1000);
+    });
+}
+
+function startReservationTimer(){
+    clearInterval(reservationTimer);
+    checkReservationExpiration();
+    reservationTimer=setInterval(checkReservationExpiration,1000);
+}
+
+function checkReservationExpiration(){
+    const reservation=getReservation();
+
+    if(!reservation){
+        clearInterval(reservationTimer);
+        return;
+    }
+
+    const remaining=getReservationRemaining();
+
+    if(remaining<=0){
+        clearInterval(reservationTimer);
+        autoCancelExpiredReservation();
+        return;
+    }
+
+    updateReservationTimerUI(remaining);
+}
+
+function autoCancelExpiredReservation(){
+    const reservation=getReservation();
+    if(!reservation) return;
+
+    const lot=parkingLots.find(l=>l.id===reservation.lotId);
+
+    if(lot){
+        const slots=getSlots(lot);
+        const slot=slots.find(x=>x.id===reservation.slotId);
+
+        if(slot && slot.status==="reserved"){
+            slot.status="available";
+        }
+
+        saveSlots(lot.id,slots);
+    }
+
+    localStorage.removeItem("jodmangkasai_reservation");
+
+    renderParkingLots();
+    updateDashboard();
+
+    if(typeof renderMyReservation==="function"){
+        renderMyReservation();
+    }
+
+    showToast(
+        "การจองถูกยกเลิกอัตโนมัติ เนื่องจากเกินเวลา 30 นาที",
+        "error",
+        "หมดเวลาการจอง"
+    );
+}
+
+function openParkingRules(){
+    const modal=document.getElementById("rulesModal");
+    if(!modal) return;
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+}
+
+function acceptParkingRules(){
+    const modal=document.getElementById("rulesModal");
+
+    if(modal){
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+
+    localStorage.setItem(
+        "jodmangkasai_rules_accepted",
+        "true"
+    );
+
+    showToast(
+        "สามารถเริ่มใช้งานระบบจอดรถได้แล้ว",
+        "success",
+        "ยินดีต้อนรับ"
+    );
+}
+
+
+/* =========================================================
+MY RESERVATION
+========================================================= */
+
+function openMyReservation(){
+
+document.getElementById("dashboardView").classList.add("hidden");
+
+document.getElementById("parkingDetailView").classList.add("hidden");
+
+document.getElementById("myReservationView").classList.remove("hidden");
+
+renderMyReservation();
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+function renderMyReservation(){
+
+const container =
+document.getElementById("myReservationContent");
+
+const reservation=getReservation();
+
+const account =
+JSON.parse(
+localStorage.getItem("jodmangkasai_account") || "null"
+);
+
+if(!reservation){
+
+container.innerHTML=`
+
+<div class="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+
+<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+
+<i class="fa-solid fa-bookmark text-2xl"></i>
+
+</div>
+
+<h2 class="mt-4 text-lg font-semibold">
+ยังไม่มีการจอง
+</h2>
+
+<p class="mt-1 text-sm text-slate-400">
+เลือกช่องจอดรถที่ต้องการเพื่อทำการจอง
+</p>
+
+<button
+onclick="showDashboard()"
+class="mt-5 rounded-xl bg-blue-600 px-5 py-3 text-sm text-white"
+>
+ค้นหาที่จอดรถ
+</button>
+
+</div>
+
+`;
+
+return;
+
+}
+
+const lot =
+parkingLots.find(l=>l.id===reservation.lotId);
+
+if(!lot)return;
+
+const vehicle =
+reservation.vehicle ||
+account?.vehicle ||
+{};
+
+const date =
+new Date(reservation.reservedAt);
+
+container.innerHTML=`
+
+<div class="mb-5">
+
+<h1 class="text-2xl font-semibold">
+การจองของฉัน
+</h1>
+
+<p class="mt-1 text-sm text-slate-400">
+รายละเอียดที่จอดรถที่คุณจองไว้
+</p>
+
+</div>
+
+
+<div class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
+
+
+<div class="bg-blue-600 p-5 text-white">
+
+<div class="flex items-center justify-between">
+
+<div>
+
+<div class="text-sm text-blue-100">
+สถานที่จอง
+</div>
+
+<h2 class="mt-1 text-xl font-semibold">
+${lot.nameTH}
+</h2>
+
+</div>
+
+<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+<i class="fa-solid fa-circle-check text-xl"></i>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="p-5">
+
+
+<div class="grid gap-4 sm:grid-cols-2">
+
+
+<div class="rounded-xl bg-slate-50 p-4">
+
+<div class="text-xs text-slate-400">
+ช่องจอด
+</div>
+
+<div class="mt-1 text-xl font-semibold">
+ช่อง ${reservation.slotId}
+</div>
+
+</div>
+
+
+<div class="rounded-xl bg-slate-50 p-4">
+
+<div class="text-xs text-slate-400">
+ทะเบียนรถ
+</div>
+
+<div class="mt-1 text-xl font-semibold">
+${vehicle.plate || "-"}
+</div>
+
+</div>
+
+
+<div class="rounded-xl bg-slate-50 p-4">
+
+<div class="text-xs text-slate-400">
+รุ่นรถ
+</div>
+
+<div class="mt-1 font-medium">
+${vehicle.model || "-"}
+</div>
+
+</div>
+
+
+<div class="rounded-xl bg-slate-50 p-4">
+
+<div class="text-xs text-slate-400">
+สีรถ
+</div>
+
+<div class="mt-1 font-medium">
+${vehicle.color || "-"}
+</div>
+
+</div>
+
+</div>
+
+
+${vehicle.image ? `
+
+<div class="mt-4">
+
+<div class="mb-2 text-sm font-medium">
+รูปรถ
+</div>
+
+<img
+src="${vehicle.image}"
+class="car-image h-48 w-full rounded-xl border border-slate-200"
+>
+
+</div>
+
+` : ""}
+
+
+<div class="mt-4 rounded-xl bg-amber-50 p-4 border border-amber-100">
+<div class="flex items-center justify-between gap-3">
+<div>
+<div class="text-sm font-medium text-amber-900"><i class="fa-solid fa-clock mr-1"></i>เวลาที่เหลือในการจอง</div>
+<div class="mt-1 text-xs text-amber-700">หากไม่มาใช้งานภายใน 30 นาที ระบบจะยกเลิกอัตโนมัติ</div>
+</div>
+<div data-reservation-timer class="text-2xl font-semibold text-amber-600">30:00</div>
+</div>
+</div>
+
+
+<div class="mt-4 rounded-xl bg-blue-50 p-4">
+
+<div class="text-xs text-blue-500">
+เวลาที่จอง
+</div>
+
+<div class="mt-1 text-sm font-medium text-blue-800">
+${date.toLocaleString("th-TH")}
+</div>
+
+</div>
+
+
+<div class="mt-5 grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+
+<button
+onclick="openParking('${lot.id}')"
+class="rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
+>
+<i class="fa-solid fa-square-parking mr-1"></i>
+ดูช่องจอด
+</button>
+
+<button
+onclick="openCamera('${lot.id}')"
+class="rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800"
+>
+<i class="fa-solid fa-video mr-1"></i>
+ดูกล้อง
+</button>
+
+<button
+onclick="openReportFromReservation()"
+class="rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-medium text-red-600 hover:bg-red-100"
+>
+<i class="fa-solid fa-flag mr-1"></i>
+แจ้งปัญหา
+</button>
+
+<button
+onclick="confirmCancelFromReservationPage()"
+class="rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-medium text-red-600 hover:bg-red-100"
+>
+<i class="fa-solid fa-trash mr-1"></i>
+ยกเลิกการจอง
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+startReservationTimer();
+}
+
+
+function confirmCancelFromReservationPage(){
+
+showConfirm(
+"ยกเลิกการจอง",
+"ต้องการยกเลิกการจองนี้ใช่หรือไม่?",
+function(){
+
+cancelReservation();
+
+renderMyReservation();
+
+}
+
+);
+
+}
+
+
+/* =========================================================
+CAMERA
+========================================================= */
+
+async function openCamera(lotId){
+
+const lot =
+parkingLots.find(l=>l.id===lotId);
+
+if(!lot)return;
+
+const available =
+getAvailableCount(lot);
+
+document.getElementById("cameraTitle").textContent =
+`กล้อง ${lot.nameTH}`;
+
+document.getElementById("cameraSubtitle").textContent =
+`${lot.camera} • ${lot.locationTH}`;
+
+document.getElementById("cameraAvailable").textContent =
+available;
+
+document.getElementById("cameraTotal").textContent =
+lot.total;
+
+document.getElementById("cameraInfo").textContent =
+`${lot.camera} • ${lot.nameTH}`;
+
+document.getElementById("cameraModal").classList.remove("hidden");
+document.getElementById("cameraModal").classList.add("flex");
+
+
+const video =
+document.getElementById("cameraVideo");
+
+const demo =
+document.getElementById("cameraDemo");
+
+video.classList.add("hidden");
+demo.classList.remove("hidden");
+
+try{
+
+if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+
+cameraStream =
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:false
+});
+
+video.srcObject=cameraStream;
+
+video.classList.remove("hidden");
+demo.classList.add("hidden");
+
+}
+
+}catch(error){
+
+console.log("Camera unavailable:",error);
+
+}
+
+}
+
+
+function closeCamera(){
+
+const video =
+document.getElementById("cameraVideo");
+
+if(cameraStream){
+
+cameraStream.getTracks().forEach(
+track=>track.stop()
+);
+
+cameraStream=null;
+
+}
+
+video.srcObject=null;
+
+video.classList.add("hidden");
+
+document.getElementById("cameraDemo").classList.remove("hidden");
+
+document.getElementById("cameraModal").classList.add("hidden");
+document.getElementById("cameraModal").classList.remove("flex");
+
+}
+
+
+/* =========================================================
+MAP
+========================================================= */
+
+function openGoogleMaps(query){
+
+const url =
+`https://www.google.com/maps/search/?api=1&query=${query}`;
+
+window.open(url,"_blank");
+
+}
+
+
+/* =========================================================
+REFRESH
+========================================================= */
+
+function refreshData(){
+
+renderParkingLots();
+
+updateDashboard();
+
+if(currentLot){
+renderParkingDetail();
+}
+
+showToast(
+"ข้อมูลได้รับการอัปเดตแล้ว",
+"success",
+"อัปเดตข้อมูล"
+);
+
+}
+
+
+/* =========================================================
+SETTINGS
+========================================================= */
+
+function openSettings(){
+
+document.getElementById("settingsModal").classList.remove("hidden");
+document.getElementById("settingsModal").classList.add("flex");
+
+loadSettings();
+
+}
+
+
+function closeSettings(){
+
+document.getElementById("settingsModal").classList.add("hidden");
+document.getElementById("settingsModal").classList.remove("flex");
+
+}
+
+
+function changeFontColor(color){
+
+document.documentElement.style.setProperty(
+"--font-color",
+color
+);
+
+localStorage.setItem(
+"jodmangkasai_font_color",
+color
+);
+
+const input =
+document.getElementById("customFontColor");
+
+if(input){
+input.value=color;
+}
+
+}
+
+
+function changeFontSize(size){
+
+let fontSize="16px";
+
+if(size==="small")fontSize="14px";
+if(size==="medium")fontSize="16px";
+if(size==="large")fontSize="18px";
+
+document.documentElement.style.fontSize=fontSize;
+
+localStorage.setItem(
+"jodmangkasai_font_size",
+size
+);
+
+}
+
+
+function changeLanguage(language){
+
+currentLang=language;
+
+localStorage.setItem(
+"jodmangkasai_language",
+language
+);
+
+applyLanguage();
+
+renderParkingLots();
+
+updateDashboard();
+
+if(currentLot){
+renderParkingDetail();
+}
+
+}
+
+
+function applyLanguage(){
+
+document.documentElement.lang=currentLang;
+
+const searchInput =
+document.getElementById("searchInput");
+
+if(searchInput){
+
+searchInput.placeholder =
+currentLang==="th"
+?"ค้นหาลานจอดรถ..."
+:"Search parking...";
+
+}
+
+}
+
+
+function loadSettings(){
+
+const color =
+localStorage.getItem("jodmangkasai_font_color");
+
+const size =
+localStorage.getItem("jodmangkasai_font_size");
+
+const language =
+localStorage.getItem("jodmangkasai_language");
+
+if(color){
+
+document.documentElement.style.setProperty(
+"--font-color",
+color
+);
+
+const input =
+document.getElementById("customFontColor");
+
+if(input)input.value=color;
+
+}
+
+if(size){
+changeFontSize(size);
+}
+
+if(language){
+currentLang=language;
+}
+
+applyLanguage();
+
+}
+
+
+/* =========================================================
+TOAST
+========================================================= */
+
+function showToast(
+message,
+type="success",
+title=null
+){
+
+const toast =
+document.getElementById("toast");
+
+const icon =
+document.getElementById("toastIcon");
+
+const titleElement =
+document.getElementById("toastTitle");
+
+const messageElement =
+document.getElementById("toastMessage");
+
+clearTimeout(toastTimer);
+
+if(type==="success"){
+
+icon.className =
+"flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600";
+
+icon.innerHTML =
+'<i class="fa-solid fa-check"></i>';
+
+titleElement.textContent =
+title || "สำเร็จ";
+
+}else if(type==="error"){
+
+icon.className =
+"flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600";
+
+icon.innerHTML =
+'<i class="fa-solid fa-xmark"></i>';
+
+titleElement.textContent =
+title || "ไม่สำเร็จ";
+
+}else{
+
+icon.className =
+"flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600";
+
+icon.innerHTML =
+'<i class="fa-solid fa-info"></i>';
+
+titleElement.textContent =
+title || "แจ้งเตือน";
+
+}
+
+messageElement.textContent=message;
+
+toast.classList.remove("hidden");
+toast.classList.add("popup-enter");
+
+toastTimer=setTimeout(
+closeToast,
+3000
+);
+
+}
+
+
+function closeToast(){
+
+const toast =
+document.getElementById("toast");
+
+toast.classList.add("hidden");
+toast.classList.remove("popup-enter");
+
+}
+
+
+/* =========================================================
+CONFIRM
+========================================================= */
+
+function showConfirm(
+title,
+message,
+action
+){
+
+const modal =
+document.getElementById("confirmModal");
+
+document.getElementById("confirmTitle").textContent=title;
+
+document.getElementById("confirmMessage").textContent=message;
+
+confirmAction=action;
+
+document.getElementById("confirmButton").onclick=function(){
+
+const actionToRun=confirmAction;
+
+closeConfirm();
+
+if(actionToRun){
+actionToRun();
+}
+
+};
+
+modal.classList.remove("hidden");
+modal.classList.add("flex");
+
+}
+
+
+function closeConfirm(){
+
+const modal =
+document.getElementById("confirmModal");
+
+modal.classList.add("hidden");
+modal.classList.remove("flex");
+
+confirmAction=null;
+
+}
+
+
+/* =========================================================
+RESERVATION MODAL
+========================================================= */
+
+function closeReservationModal(){
+
+document.getElementById("reservationModal").classList.add("hidden");
+document.getElementById("reservationModal").classList.remove("flex");
+
+}
+
+
+/* =========================================================
+OUTSIDE CLICK
+========================================================= */
+
+document.addEventListener("click",function(event){
+
+const searchBox =
+document.getElementById("searchResults");
+
+const searchInput =
+document.getElementById("searchInput");
+
+if(
+searchBox &&
+!searchBox.contains(event.target) &&
+event.target!==searchInput
+){
+
+searchBox.classList.add("hidden");
+
+}
+
+});
+
+
+/* =========================================================
+ESC
+========================================================= */
+
+document.addEventListener("keydown",function(event){
+
+if(event.key==="Escape"){
+
+closeSlotModal();
+closeSettings();
+closeConfirm();
+closeToast();
+closeCamera();
+closeReservationModal();
+
+const rulesModal=document.getElementById("rulesModal");
+if(rulesModal){
+    rulesModal.classList.add("hidden");
+    rulesModal.classList.remove("flex");
+}
+
+}
+
+});
+
+
+/* =========================================================
+INITIALIZE
+========================================================= */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+loadSettings();
+
+const loggedIn =
+localStorage.getItem("jodmangkasai_logged_in");
+
+if(loggedIn==="true"){
+
+showApp();
+startReservationTimer();
+
+}else{
+
+showWelcome();
+
+}
+
+updateDashboard();
+
+});
+
+</script>
+
+</body>
+</html>
